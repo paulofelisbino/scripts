@@ -1,0 +1,38 @@
+#!/bin/bash
+
+readonly DIR="${0%/*}"
+
+source "${DIR}/colors"
+source "${DIR}/key_functions"
+
+readonly CUSTOM_KEY="${1}"
+readonly SSH_DIR="${HOME}/.ssh"
+
+readonly CUSTOM_PRIVATE_KEY="id_rsa_${CUSTOM_KEY}"
+readonly CUSTOM_PUBLIC_KEY="${CUSTOM_PRIVATE_KEY}.pub"
+
+yellow_text 'Checking if ssh key pair exists...'
+
+if ! $(key_pair_exists "${SSH_DIR}" "${CUSTOM_PRIVATE_KEY}" "${CUSTOM_PUBLIC_KEY}"); then
+  red_text "${CUSTOM_PRIVATE_KEY} or ${CUSTOM_PUBLIC_KEY} not found."
+  exit 1
+fi
+
+sleep 1
+
+yellow_text 'Checking if ssh key already is default...'
+
+if [[ $(validate_keys "${SSH_DIR}" "${CUSTOM_PUBLIC_KEY}") -eq 0 ]]; then
+  green_text "Nothing to do here, ssh key ${CUSTOM_KEY} is already default!"
+  exit 1
+fi
+
+sleep 1
+
+yellow_text "Setting ssh key ${CUSTOM_KEY} as default..."
+
+set_keys "${SSH_DIR}" "${CUSTOM_PRIVATE_KEY}" "${CUSTOM_PUBLIC_KEY}"
+
+sleep 1
+
+green_text 'Done!'

@@ -1,0 +1,45 @@
+#!/bin/bash
+
+key_pair_exists() {
+  local sshDir="${1}"
+  local privateKey="${2}"
+  local publicKey="${3}"
+
+  local customPrivateKey="${sshDir}/${privateKey}"
+  local customPublicKey="${sshDir}/${publicKey}"
+  local exists=false
+
+  if [[ -f $customPrivateKey ]] && [[ -f $customPublicKey ]]; then
+    exists=true
+  fi
+
+  echo $exists
+}
+
+validate_keys() {
+  local sshDir="${1}"
+  local publicKey="${2}"
+
+  local defaultPublicKey="${sshDir}/id_rsa.pub"
+  local customPublicKey="${sshDir}/${publicKey}"
+
+  STATUS="$(
+    cmp --silent "${defaultPublicKey}" "${customPublicKey}"
+    echo $?
+  )" # "$?" gives exit status for each comparison
+  echo $STATUS
+}
+
+set_keys() {
+  local sshDir="${1}"
+  local privateKey="${2}"
+  local publicKey="${3}"
+
+  local defaultPrivateKey="${sshDir}/id_rsa"
+  local defaultPublicKey="${sshDir}/id_rsa.pub"
+  local customPrivateKey="${sshDir}/${privateKey}"
+  local customPublicKey="${sshDir}/${publicKey}"
+
+  cp "${customPrivateKey}" "${defaultPrivateKey}"
+  cp "${customPublicKey}" "${defaultPublicKey}"
+}
